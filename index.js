@@ -14,15 +14,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const body_parser_1 = __importDefault(require("body-parser"));
+const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
+// Tillagger middlewares till ens App.
+app.use(body_parser_1.default.json());
+app.use(body_parser_1.default.urlencoded({
+    extended: true
+}));
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use((request, response, next) => {
+    response.header('Access-Control-Allow-Origin', '*');
+    response.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+app.use(express_1.default.static(path_1.default.join(path_1.default.resolve(), 'public')));
 // Själva serven/databasen "test" som innehåller collection "users"
 const client = new mongodb_1.MongoClient('mongodb://127.0.0.1:27017/'), users = client.db('test').collection('users');
 // MongoDB med express:
 // Hämta alla users
 app.get("/", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield users.find().toArray();
-    console.log(result);
+    // console.log(result)
     response.status(200).json(result);
 }));
 // lägg till user

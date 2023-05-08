@@ -1,8 +1,26 @@
 import {MongoClient, ObjectId} from 'mongodb'
 import express from 'express'
+import cors from 'cors'
+import bodyParser from 'body-parser';
+import path from 'path';
 
 const app = express();
+
+// Tillagger middlewares till ens App.
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+  extended:true
+}))
+app.use(cors())
 app.use(express.json())
+
+app.use((request, response, next) => {
+  response.header('Access-Control-Allow-Origin', '*')
+  response.header('Access-Control-Allow-Headers', 'Content-Type')
+  next()
+})
+
+app.use(express.static(path.join(path.resolve(), 'public')))
 
 // Själva serven/databasen "test" som innehåller collection "users"
 const client = new MongoClient('mongodb://127.0.0.1:27017/'),
@@ -13,7 +31,7 @@ const client = new MongoClient('mongodb://127.0.0.1:27017/'),
 // Hämta alla users
 app.get("/", async (request, response) => {
   const result = await users.find().toArray()
-  console.log(result)
+  // console.log(result)
   response.status(200).json(result)
 })
 
